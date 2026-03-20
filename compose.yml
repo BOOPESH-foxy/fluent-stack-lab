@@ -1,0 +1,84 @@
+# Docker Compose Learning File
+# Run with: docker compose up
+# Stop with: docker compose down
+
+# The top-level 'services' key defines each container you want to run
+services:
+
+  # --- SERVICE 1: A simple web server ---
+  web:
+    # 'image' pulls a pre-built image from Docker Hub
+    image: nginx:alpine
+
+    # 'ports' maps host:container ports so you can access the container
+    # Visit http://localhost:8080 to see nginx
+    ports:
+      - "8080:80"
+
+    # 'volumes' mounts files/folders from your machine into the container
+    # Here we mount a local folder as the nginx web root
+    volumes:
+      - ./html:/usr/share/nginx/html:ro  # :ro = read-only
+
+    # 'depends_on' ensures 'db' starts before 'web'
+    depends_on:
+      - db
+
+    # 'restart' policy: no | always | on-failure | unless-stopped
+    restart: unless-stopped
+
+    # 'networks' connects this service to named networks
+    networks:
+      - app-network
+
+  # --- SERVICE 2: A database ---
+  db:
+    image: postgres:16-alpine
+
+    # 'environment' sets environment variables inside the container
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+
+    # Named volumes persist data even after 'docker compose down'
+    # (unlike bind mounts, Docker manages where this data lives)
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+    networks:
+      - app-network
+
+    # 'expose' makes a port available to other services (not the host)
+    expose:
+      - "5432"
+
+  # --- SERVICE 3: A one-off utility container ---
+  adminer:
+    # Adminer is a lightweight DB UI — visit http://localhost:8081
+    image: adminer
+
+    ports:
+      - "8081:8080"
+
+    depends_on:
+      - db
+
+    networks:
+      - app-network
+
+    # 'profiles' means this service only starts when you explicitly include it:
+    # docker compose --profile tools up
+    profiles:
+      - tools
+
+# 'volumes' at the top level declares named volumes
+# Docker manages their lifecycle separately from containers
+volumes:
+  db-data:
+
+# 'networks' at the top level declares custom networks
+# Services on the same network can reach each other by service name (e.g. "db")
+networks:
+  app-network:
+    driver: bridge
