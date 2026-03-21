@@ -13,7 +13,7 @@ services:
     # 'ports' maps host:container ports so you can access the container
     # Visit http://localhost:8080 to see nginx
     ports:
-      - "8080:80"
+      - "8070:80"
 
     # 'volumes' mounts files/folders from your machine into the container
     # Here we mount a local folder as the nginx web root
@@ -60,6 +60,10 @@ services:
 
     ports:
       - "8081:8080"
+
+    environment:
+      # Allows login when server is pre-filled via URL params
+      ADMINER_DEFAULT_SERVER: db
 
     depends_on:
       - db
