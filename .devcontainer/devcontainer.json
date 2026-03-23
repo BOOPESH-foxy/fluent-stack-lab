@@ -1,0 +1,22 @@
+{
+  "name": "Flask redis development",
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile"
+  },
+  "forwardPorts": [5000],
+  "portsAttributes": {
+    "5000": {
+      "label": "Flask App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "runArgs": ["--network=host"],
+  "containerEnv": {
+    "FLASK_APP": "app.py",
+    "FLASK_ENV": "development",
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": "6379"
+  },
+  "postCreateCommand": "pip install -r requirements.txt"
+}
