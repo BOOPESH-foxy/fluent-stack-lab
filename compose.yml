@@ -1,3 +1,5 @@
+name: redis-cache-webhits
+
 include:
    - path: ./infra.yaml
 services:
@@ -18,3 +20,9 @@ services:
           target: /code
         - action: rebuild
           path: requirements.txt
+    post_start:
+      - command: python -c "import redis,os; r=redis.Redis(host='redis'); r.ping(); print(f'Redis OK - User {os.getenv(\"user\")}')"
+        environment:
+          - user=boo-foxy
+    pre_stop:
+      - command: /bin/sh -c "echo 'Shutting down ${user}'; sleep 2"
