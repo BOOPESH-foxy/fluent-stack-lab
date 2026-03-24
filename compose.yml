@@ -1,3 +1,5 @@
+include:
+   - path: ./infra.yaml
 services:
   web:
     build: .
@@ -6,6 +8,13 @@ services:
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-
-  redis:
-    image: redis:alpine
+    depends_on:
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /code
+        - action: rebuild
+          path: requirements.txt
